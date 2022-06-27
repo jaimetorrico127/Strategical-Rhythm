@@ -1,0 +1,233 @@
+# @SpencerLepine - Connect Four command-line game made w/ Python
+import random
+import numpy as np
+# Hard-coded board size
+BOARD_COLS = 7
+BOARD_ROWS = 6
+
+#We added this
+#Turn variable
+turn = 0
+#last move variable
+lastMove = 0
+
+#board variable
+#Initialize board
+board = [[' ' for _ in range(BOARD_COLS)] for _ in range(BOARD_ROWS)]
+#End we added this
+
+# Game board object
+class Board():
+    global board
+    global lastMove
+    def __init__(self):
+        #2D array that represents the board
+        #board = [[' ' for _ in range(BOARD_COLS)] for _ in range(BOARD_ROWS)]
+        self.turns = 0
+        lastMove = [-1, -1] # [r, c]
+
+    def print_board(self):
+        print("\n")
+        # Number the columns seperately to keep it cleaner
+        for r in range(BOARD_COLS):
+            print(f"  ({r+1}) ", end="")
+        print("\n")
+
+        # Print the slots of the game board
+        for r in range(BOARD_ROWS):
+            print('|', end="")
+            for c in range(BOARD_COLS):
+                print(f"  {board[r][c]}  |", end="")
+            print("\n")
+
+        print(f"{'-' * 42}\n")
+
+    def which_turn(self):
+        players = ['X', 'O']
+        return players[self.turns % 2]
+    
+    def in_bounds(self, r, c):
+        return (r >= 0 and r < BOARD_ROWS and c >= 0 and c < BOARD_COLS)
+
+    def turn(self, column):
+        global lastMove
+        # Search bottom up for an open slot
+        for i in range(BOARD_ROWS-1, -1, -1):
+            if board[i][column] == ' ':
+                board[i][column] = self.which_turn()
+                lastMove = [i, column]
+                #prints last move
+                print("Last move:",lastMove)
+
+                self.turns += 1
+                return True
+
+        return False
+
+
+    def check_winner(self):
+        last_row = lastMove[0]
+        last_col = lastMove[1]
+        last_letter = board[last_row][last_col]
+
+        # [r, c] direction, matching letter count, locked bool
+        directions = [[[-1, 0], 0, True], 
+                      [[1, 0], 0, True], 
+                      [[0, -1], 0, True],
+                      [[0, 1], 0, True],
+                      [[-1, -1], 0, True],
+                      [[1, 1], 0, True],
+                      [[-1, 1], 0, True],
+                      [[1, -1], 0, True]]
+        
+        # Search outwards looking for matching pieces
+        for a in range(4):
+            for d in directions:
+                r = last_row + (d[0][0] * (a+1))
+                c = last_col + (d[0][1] * (a+1))
+
+                if d[2] and self.in_bounds(r, c) and board[r][c] == last_letter:
+                    d[1] += 1
+                else:
+                    # Stop searching in this direction
+                    d[2] = False
+
+        # Check possible direction pairs for '4 pieces in a row'
+        for i in range(0, 7, 2):
+            if (directions[i][1] + directions[i+1][1] >= 3):
+                self.print_board()
+                #Original winner print code but replaced with User or AI winning
+                #print(f"{last_letter} is the winner!")
+
+
+                #We added this
+                #Prints is the User won of if the ai won
+                if last_letter == "X":
+                    print("You Won!!")
+                else:
+                    print("The AI Won!")
+                return last_letter   
+                #End we added this
+
+
+
+        # Did not find any winners
+        return False
+
+#Start AI class
+class AI():
+    qTable = [None]*BOARD_COLS
+
+    def randNum():
+        return random.randint(1,7)
+
+#############################################
+
+    def moveLeft(row, column):
+        starting_point = (row, column)
+        piece = board[row][column-1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        #Should start at i-1
+        else:
+            for i in range(column, -1, -1):
+                if board[row][i] == piece:
+                    count += 1
+
+                
+        return piece, count
+    
+ ################################################
+
+        #Finds the first open stop in each columns where a piece would fall
+    def findTopOpen(column):
+        #default row value
+        AI.qTable[column] = 0
+
+        #checks to see if a column is already full
+        if board[0][column] != ' ':
+            AI.qTable[column] = "full"
+            return
+        #If column not full it will search untill it finds the first open row
+        for r in range(BOARD_ROWS):
+            if board[r][column] != ' ':
+                AI.qTable[column] = AI.moveLeft(r-1, column)
+                #print("Row: ",r-1,"Column: ", column)
+                return
+            
+        #If the bottom row is empty
+        if board[r][column] == ' ':
+            AI.qTable[column] = AI.moveLeft(r, column)
+        
+
+
+    def updateQ():
+        for c in range(BOARD_COLS):
+            AI.findTopOpen(c)
+
+        print(AI.qTable) 
+
+        # Number the columns seperately to keep it cleaner
+        #for c in range(BOARD_COLS):
+        #    for r in range(BOARD_ROWS):
+        #        if board[r][c] == " ":
+        #            return
+
+
+
+def play():
+    #We added this
+    #Uses global turn variable to keep track if it is the AI's turn or the humans
+    global turn
+    #End we added this
+
+    # Initialize the game board
+    game = Board()
+    game_over = False
+    while not game_over:
+        game.print_board()
+
+        #We added this
+        #AI drop token in random spot
+        if  turn % 2 == 1:
+            valid_move = False
+            while not valid_move:
+                ai_move = AI.randNum()
+                #print(AI.qTable)
+                try:
+                    valid_move = game.turn(int(ai_move)-1)
+                    print("AI choose",ai_move)
+                except:
+                    print("Invalid: ", ai_move)
+        #End we added this
+                
+        else:
+        # Ask the user for input, but only accept valid turns
+            valid_move = False
+            while not valid_move:
+                user_move = input(f"{game.which_turn()}'s Turn - pick a column (1-{BOARD_COLS}): ")
+                try:
+                    valid_move = game.turn(int(user_move)-1)
+                except:
+                    print(f"Please choose a number between 1 and {BOARD_COLS}")
+        #Updates table 
+        AI.updateQ()
+        #We added this
+        #Finish else and increment turn
+        turn+=1
+        #End we added this
+
+
+        # End the game if there is a winner
+        game_over = game.check_winner()
+        
+        # End the game if there is a tie
+        if not any(' ' in x for x in board):
+            print("The game is a draw..")
+            return
+
+
+if __name__ == '__main__':
+    play()
