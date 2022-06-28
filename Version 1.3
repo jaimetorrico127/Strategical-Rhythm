@@ -154,7 +154,7 @@ class AI():
             #It does this by finding the first occupied row and subtracing 1 from it therefore returning where the new piece would fall
         for r in range(BOARD_ROWS):
             if board[r][column] != ' ':
-                AI.qTable[column] = AI.moveLeft(r-1, column)
+                AI.qTable[column] += AI.moveLeft(r-1, column)
                 #print("Row: ",r-1,"Column: ", column)
                 return
             
