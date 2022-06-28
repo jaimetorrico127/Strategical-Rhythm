@@ -61,7 +61,6 @@ class Board():
 
                 self.turns += 1
                 return True
-
         return False
 
 
@@ -131,9 +130,10 @@ class AI():
             return 0
         #if there is a piece it counts and returns the piece
         else:
-            for i in range(column, -1, -1):
+            #for some reason it counts the pieces to the left
+            for i in range(column, 0, -1):
                 #Increments if the piece equals the privous
-                if board[row][i-1] == piece:
+                if board[row][i-1] == piece and i-1 != 7:
                     count += 1
                 #breaks if the pieces are different or if there is no piece
                 else:
