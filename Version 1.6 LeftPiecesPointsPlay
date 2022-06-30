@@ -149,6 +149,8 @@ class AI():
                     break
         #Returns the pieces and the count of the pieces
         return piece, count
+
+
              
 ###################################################
     #Method that takes the type of piece and the number of pieces and returns the according points based on the point system
@@ -168,7 +170,7 @@ class AI():
 
         #checks to see if a column is already full
         if board[0][column] != ' ':
-            AI.qTable[column] = "full"
+            AI.qTable[column] = -100
             return
 
         #If column not full it will search untill it finds the first open row 
@@ -177,7 +179,7 @@ class AI():
             if board[r][column] != ' ':
                 #Variable that holds how many pieces and which type of piece they are
                 piecesReturned = AI.countLeftPieces(r-1, column)
-                AI.qTable[column] = AI.returnPoints(piecesReturned)
+                AI.qTable[column] += AI.returnPoints(piecesReturned)
                 #Test that count right pieces is working
                 #countRight = AI.countRightPieces(r-1,column)
                 return
@@ -186,7 +188,7 @@ class AI():
         if board[r][column] == ' ':
             leftPieces = AI.countLeftPieces(r, column)
             points = AI.returnPoints(leftPieces)
-            AI.qTable[column] = points
+            AI.qTable[column] += points
             #Test that count right pieces is working
             #rightPieces = AI.countRightPieces(r,column)
             #print(rightPieces)
