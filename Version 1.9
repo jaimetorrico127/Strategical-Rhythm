@@ -123,7 +123,7 @@ class AI():
     def randNum():
         return random.randint(1,7)
 
-################################################
+#############################################
 
     def countLeftPieces(row, column):
         #The current piece to the left of the first open column
@@ -149,20 +149,20 @@ class AI():
 
     def countRightPieces(row,column):
         #The current piece to the right of the first open column
-        
+        #Variable used to check if the column is out of bounds
         currColumn = column + 1
         if currColumn == 7:
             return 0
-        
+            
         piece = board[row][column + 1]
         count = 0
         #if there is no piece or out of bounds returns 0
         if piece == ' ':
             return 0
         else:
-            for i in range(column, 6, 1) and i != 7:
+            for i in range(column, 6, 1):
                 #Increments upwards from 0 by 1 step
-                if board[row][i + 1] == piece and i != 7:
+                if board[row][i+1] == piece and i != 7: #Need to make sure that it does not go directly from 7 to 1
                     count += 1
                 #breaks if the pieces are different or if there is no piece
                 else:
@@ -188,13 +188,14 @@ class AI():
 ####################################################
 
     def countDownPieces(row, column):
+
         piece = [row - 1][column]
         count = 0
 
         if piece == ' ':
             return 0
         else:
-            for i in range(row, 0, -1):
+            for i in range(row, 6, -1):
                 if board[row][i - 1] == piece:
                     count += 1
                 else:
