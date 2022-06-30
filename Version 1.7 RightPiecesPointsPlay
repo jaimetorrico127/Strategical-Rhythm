@@ -128,29 +128,29 @@ class AI():
     def AIMove():
         maxPoints = (max(AI.qTable))
         return AI.qTable.index(maxPoints)
-################################################
-    #Checks how many consecutive pieces of the same piece are to the left of the current first open spot on the board
-    def countLeftPieces(row, column):
-        #The current piece to the left of the first open column
-        piece = board[row][column-1]
-        count = 0;
+################################################Replaced Count left method with count right method
+    #Checks how many consecutive pieces of the same piece are to the RIGHT of the current first open spot on the board
+    def countRightPieces(row,column):
+        #The current piece to the right of the first open column
+        #Variable used to check if the column is out of bounds
+        currColumn = column + 1
+        if currColumn == 7:
+            return 0
+            
+        piece = board[row][column + 1]
+        count = 0
         #if there is no piece or out of bounds returns 0
         if piece == ' ':
             return 0
-        #if there is a piece it counts and returns the piece
         else:
-            #for some reason it counts the pieces to the left
-            for i in range(column, 0, -1):
-                #Increments if the piece equals the privous
-                if board[row][i-1] == piece and i-1 != 7:
+            for i in range(column, 6, 1):
+                #Increments upwards from 0 by 1 step
+                if board[row][i+1] == piece and i != 7: #Need to make sure that it does not go directly from 7 to 1
                     count += 1
                 #breaks if the pieces are different or if there is no piece
                 else:
                     break
-        #Returns the pieces and the count of the pieces
         return piece, count
-
-        
              
 ###################################################
     #Method that takes the type of piece and the number of pieces and returns the according points based on the point system
@@ -170,6 +170,7 @@ class AI():
 
         #checks to see if a column is already full
         if board[0][column] != ' ':
+            #full causes problems so intead it will be repalces with a very small number so that the AI can't choose it
             AI.qTable[column] = -100
             return
 
@@ -178,17 +179,17 @@ class AI():
         for r in range(BOARD_ROWS):
             if board[r][column] != ' ':
                 #Variable that holds how many pieces and which type of piece they are
-                piecesReturned = AI.countLeftPieces(r-1, column)
-                AI.qTable[column] = AI.returnPoints(piecesReturned)
+                piecesReturned = AI.countRightPieces(r-1, column)
+                AI.qTable[column] += AI.returnPoints(piecesReturned)
                 #Test that count right pieces is working
                 #countRight = AI.countRightPieces(r-1,column)
                 return
             
         #If the bottom row is empty it will pass down the bottom row not the row-1
         if board[r][column] == ' ':
-            leftPieces = AI.countLeftPieces(r, column)
-            points = AI.returnPoints(leftPieces)
-            AI.qTable[column] = points
+            rightPieces = AI.countRightPieces(r, column)
+            points = AI.returnPoints(rightPieces)
+            AI.qTable[column] += points
             #Test that count right pieces is working
             #rightPieces = AI.countRightPieces(r,column)
             #print(rightPieces)
@@ -203,7 +204,6 @@ class AI():
 
 #End AI class
 ##########################################################################################
-
 
 def play():
     #We added this
