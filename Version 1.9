@@ -229,7 +229,7 @@ class AI():
         for r in range(BOARD_ROWS):
             if board[r][column] != ' ':
                 AI.qTable[column] = r-1
-                AI.moveLeft(r, column)
+                AI.countDownPieces(r, column)
                 #print("Row: ",r-1,"Column: ", column)
                 return
 
