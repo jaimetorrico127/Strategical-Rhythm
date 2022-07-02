@@ -1,0 +1,33 @@
+################################################
+    #Counts digonal the down right ie: \
+    def countLeftDownDiagonalPieces(row, column):
+        #If there is no diagonal becuase it is out of bounds it returns 0
+        if row == 5 or column == 6:
+            return 0
+
+        #Set the piece to the current bottom right diagonal
+        piece = board[row+1][column+1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        #If there is a piece
+        else:
+            #start at current column
+            i = column
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            inc = 1
+            #while the row and column + inc are in bound
+            while row + inc < 6 and column + inc < 7:
+                curr = board[row+inc][column+inc]
+                #if pieces are equal it increments the count
+                if curr == piece:
+                    count += 1
+                    inc += 1
+                    i += 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
+             
+###################################################
