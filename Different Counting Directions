@@ -1,0 +1,104 @@
+################################################
+    #Checks how many consecutive pieces of the same piece are to the left of the current open spot
+    def countLeftPieces(row, column):
+        #The current piece to the left of the first open column
+        piece = board[row][column-1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        #if there is a piece it counts and returns the piece
+        else:
+            #for some reason it counts the pieces to the left
+            for i in range(column, 0, -1):
+                #Increments if the piece equals the privous
+                if board[row][i-1] == piece and i-1 != 7:
+                    count += 1
+                #breaks if the pieces are different or if there is no piece
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count  
+################################################
+    #Checks how many consecutive pieces of the same piece are to the right of the current the current open spot (\)
+    def countRightPieces(row,column):
+        #The current piece to the right of the first open column
+        #Variable used to check if the column is out of bounds
+        currColumn = column + 1
+        if currColumn == 7:
+            return 0
+            
+        piece = board[row][column + 1]
+        count = 0
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        else:
+            for i in range(column, 6, 1):
+                #Increments upwards from 0 by 1 step
+                if board[row][i+1] == piece and i != 7: #Need to make sure that it does not go directly from 7 to 1
+                    count += 1
+                #breaks if the pieces are different or if there is no piece
+                else:
+                    break
+        return piece, count
+################################################
+    #Checks how many pieces are to the top left diagonal of the current open spot
+    def countLeftUpDiagonalPieces(row, column):
+        #If there is no left diagonal becuase it is out of bounds
+        if row == 0 or column == 0:
+            return 0
+        #Set the piece to the current left diagonal
+        piece = board[row-1][column-1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        else:
+            #start at current column
+            i = column
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            inc = 1
+            #while the column is greater than 0
+            while i > 0:
+                curr = board[row-inc][column-inc]
+                if curr == piece:
+                    count += 1
+                    inc += 1
+                    i -= 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
+################################################
+    #Counts bottom right diagonal pieces (\)
+    def countLeftDownDiagonalPieces(row, column):
+        #If there is no diagonal becuase it is out of bounds it returns 0
+        if row == 5 or column == 6:
+            return 0
+
+        #Set the piece to the current bottom right diagonal
+        piece = board[row+1][column+1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        #If there is a piece
+        else:
+            #start at current column
+            i = column
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            inc = 1
+            #while the row and column + inc are in bound
+            while row + inc < 6 and column + inc < 7:
+                curr = board[row+inc][column+inc]
+                #if pieces are equal it increments the count
+                if curr == piece:
+                    count += 1
+                    inc += 1
+                    i += 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
+###################################################
