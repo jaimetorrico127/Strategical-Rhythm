@@ -127,4 +127,30 @@
                     break
         #Returns the pieces and the count of the pieces
         return piece, count
+################################################
+    #Counts how many pieces are to the bottom left of the current open spot (/)
+    def TBD WHICH DIRECTION(row, column):
+        #If there is no left diagonal becuase it is out of bounds
+        if row == 5 or column == 6:
+            return 0
+        #Set the piece to the current bottom right diagonal
+        piece = board[row+1][column+1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        
+        else:
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            i = 1
+            #while the top right diagonal is in bounds
+            while row+i < 6 and column+i < 7:
+                curr = board[row+i][column+i]
+                if curr == piece:
+                    count += 1
+                    i += 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
 ###################################################
