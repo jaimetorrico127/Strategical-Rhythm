@@ -101,4 +101,30 @@
                     break
         #Returns the pieces and the count of the pieces
         return piece, count
+################################################
+    #Counts how many pieces are to the top right of the current open spot
+    def countTopRightDiagonalPieces(row, column):
+        #If there is no right diagonal becuase it is out of bounds
+        if row == 0 or column == 6:
+            return 0
+        #Set the piece to the current left diagonal
+        piece = board[row-1][column+1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        
+        else:
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            i = 1
+            #while the top right diagonal is in bounds
+            while row-i > 0 and column+i < 6:
+                curr = board[row-i][column+i]
+                if curr == piece:
+                    count += 1
+                    i += 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
 ###################################################
