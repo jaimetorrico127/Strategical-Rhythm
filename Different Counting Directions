@@ -43,7 +43,7 @@
                     break
         return piece, count
 ################################################
-    #Checks how many pieces are to the top left diagonal of the current open spot
+    #Checks how many pieces are to the top left diagonal of the current open spot (Top \)
     def countLeftUpDiagonalPieces(row, column):
         #If there is no left diagonal becuase it is out of bounds
         if row == 0 or column == 0:
@@ -71,7 +71,7 @@
         #Returns the pieces and the count of the pieces
         return piece, count
 ################################################
-    #Counts bottom right diagonal pieces (\)
+    #Counts bottom right diagonal pieces (Bottom \)
     def countLeftDownDiagonalPieces(row, column):
         #If there is no diagonal becuase it is out of bounds it returns 0
         if row == 5 or column == 6:
@@ -102,7 +102,7 @@
         #Returns the pieces and the count of the pieces
         return piece, count
 ################################################
-    #Counts how many pieces are to the top right of the current open spot (/)
+    #Counts how many pieces are to the top right of the current open spot (Top /)
     def countTopRightDiagonalPieces(row, column):
         #If there is no right diagonal becuase it is out of bounds
         if row == 0 or column == 6:
@@ -128,13 +128,13 @@
         #Returns the pieces and the count of the pieces
         return piece, count
 ################################################
-    #Counts how many pieces are to the bottom left of the current open spot (/)
-    def TBD WHICH DIRECTION(row, column):
-        #If there is no left diagonal becuase it is out of bounds
-        if row == 5 or column == 6:
+    #Counts how many pieces are to the bottom left of the current open spot (Bottom /)
+    def countBottomRightDiagonal(row, column):
+        #If there is no diagonal becuase it is out of bounds
+        if row == 5 or column == 0:
             return 0
-        #Set the piece to the current bottom right diagonal
-        piece = board[row+1][column+1]
+        #Set the piece to the current left diagonal
+        piece = board[row+1][column-1]
         count = 0;
         #if there is no piece or out of bounds returns 0
         if piece == ' ':
@@ -145,7 +145,7 @@
             i = 1
             #while the top right diagonal is in bounds
             while row+i < 6 and column+i < 7:
-                curr = board[row+i][column+i]
+                curr = board[row+i][column-i]
                 if curr == piece:
                     count += 1
                     i += 1
