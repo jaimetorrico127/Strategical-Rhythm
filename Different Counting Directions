@@ -102,7 +102,7 @@
         #Returns the pieces and the count of the pieces
         return piece, count
 ################################################
-    #Counts how many pieces are to the top right of the current open spot
+    #Counts how many pieces are to the top right of the current open spot (/)
     def countTopRightDiagonalPieces(row, column):
         #If there is no right diagonal becuase it is out of bounds
         if row == 0 or column == 6:
