@@ -154,3 +154,22 @@
         #Returns the pieces and the count of the pieces
         return piece, count
 ###################################################
+    #count the pieces under the current open spot
+    def countDownPieces(row, column):
+        #if down is out of bounds
+        if row == 5:
+            return 0
+        
+        piece = board[row + 1][column]
+        count = 0
+        if piece == ' ':
+            return 0
+        else:
+            while row < 5:
+                if board[row+1][column] == piece:
+                    count += 1
+                    row+=1
+                else:
+                    break
+        return piece, count
+####################################################
