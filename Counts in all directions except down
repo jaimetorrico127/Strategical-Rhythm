@@ -118,7 +118,7 @@ class AI():
     qTable = [None]*BOARD_COLS
 
     #Points system
-    AIPointsTable = {0: 0, 1: 1.5, 2: 4, 3: 100}
+    AIPointsTable = {0: 0, 1: 1.15, 2: 3.8, 3: 100}
     humanPointsTable = {0: 0, 1: 1, 2: 3, 3: 20}
 
 ###################################################
@@ -156,6 +156,7 @@ class AI():
 ################################################
     #Need a method that will call all of the other methods to count the pieces
     def tallyPoints(row, column):
+
         #calculate how many pieces there are to the left
         pieces = AI.countLeftPieces(row, column)
         points = AI.returnPoints(pieces)
@@ -185,6 +186,12 @@ class AI():
         pieces = AI.countBottomRightDiagonal(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
+
+        #calculate how many pieces are under
+        pieces = AI.countDownPieces(row, column)
+        points = AI.returnPoints(pieces)
+        AI.qTable[column] += points
+
 ################################################
 #Counting directions methods
         # #Checks how many consecutive pieces of the same piece are to the left of the current open spot
@@ -340,6 +347,25 @@ class AI():
                 else:
                     break
         #Returns the pieces and the count of the pieces
+        return piece, count
+####################################################
+    #count the pieces under the current open spot
+    def countDownPieces(row, column):
+        #if down is out of bounds
+        if row == 5:
+            return 0
+        
+        piece = board[row + 1][column]
+        count = 0
+        if piece == ' ':
+            return 0
+        else:
+            while row < 5:
+                if board[row+1][column] == piece:
+                    count += 1
+                    row+=1
+                else:
+                    break
         return piece, count
 #End counting directions method
 ################################################
