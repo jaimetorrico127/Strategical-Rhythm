@@ -157,37 +157,37 @@ class AI():
     #Need a method that will call all of the other methods to count the pieces
     def tallyPoints(row, column):
 
-        #calculate how many pieces there are to the left
+        #calculate how many pieces there are to the left (-)
         pieces = AI.countLeftPieces(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
 
-        #calculate how many pieces there are to the right
+        #calculate how many pieces there are to the right (-)
         pieces = AI.countRightPieces(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
 
-        #calculate how many pieces there are to the top 
+        #calculate how many pieces there are to the top left diagonal (Top \)
         pieces = AI.countLeftUpDiagonalPieces(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
 
-        #calculate how many pieces there are to the left
+        #calculate how many pieces there are to the left (Bottom \)
         pieces = AI.countLeftDownDiagonalPieces(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
 
-        #calculate how many pieces there are to the right
+        #calculate how many pieces there are to the right (Top /)
         pieces = AI.countTopRightDiagonalPieces(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
 
-        #calculate how many pieces there are to the top 
+        #calculate how many pieces there are to the top (Bottom /)
         pieces = AI.countBottomRightDiagonal(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
 
-        #calculate how many pieces are under
+        #calculate how many pieces are under (Bottom |)
         pieces = AI.countDownPieces(row, column)
         points = AI.returnPoints(pieces)
         AI.qTable[column] += points
