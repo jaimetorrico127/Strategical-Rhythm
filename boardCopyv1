@@ -1,0 +1,101 @@
+BOARD_COLS = 7
+BOARD_ROWS = 6
+
+# creates copy of the board to manipulate
+class boardCopy():
+
+    global boardCopy
+    global lastMove
+
+    def __init__(self):
+
+        # 2D array that represents the board
+        #board = [[' ' for _ in range(BOARD_COLS)] for _ in range(BOARD_ROWS)]
+        self.turns = 0
+
+        lastMove = [-1, -1]  # [r, c]
+
+    def print_board(self):
+        print("\n")
+        # Number the columns seperately to keep it cleaner
+        for r in range(BOARD_COLS):
+            print(f"  ({r+1}) ", end="")
+        print("\n")
+
+        # Print the slots of the game board
+        for r in range(BOARD_ROWS):
+            print('|', end="")
+            for c in range(BOARD_COLS):
+                print(f"  {boardCopy[r][c]}  |", end="")
+            print("\n")
+
+        print(f"{'-' * 42}\n")
+
+    def which_turn(self):
+        players = ['X', 'O']
+        return players[self.turns % 2]
+
+    def in_bounds(self, r, c):
+        return (r >= 0 and r < BOARD_ROWS and c >= 0 and c < BOARD_COLS)
+
+    def turn(self, column):
+        global lastMove
+        # Search bottom up for an open slot
+        for i in range(BOARD_ROWS-1, -1, -1):
+            if boardCopy[i][column] == ' ':
+                boardCopy[i][column] = self.which_turn()
+                lastMove = [i, column]
+                # prints last move
+                print("Last move:", lastMove)
+
+                self.turns += 1
+                return True
+        return False
+
+    def dangerousMove(self, row, column):
+        last_row = lastMove[0]
+        last_col = lastMove[1]
+        last_letter = boardCopy[last_row][last_col]
+
+        # [r, c] direction, matching letter count, locked bool
+        directions = [[[-1, 0], 0, True],
+                      [[1, 0], 0, True],
+                      [[0, -1], 0, True],
+                      [[0, 1], 0, True],
+                      [[-1, -1], 0, True],
+                      [[1, 1], 0, True],
+                      [[-1, 1], 0, True],
+                      [[1, -1], 0, True]]
+
+        # Search outwards looking for matching pieces
+        for a in range(4):
+            for d in directions:
+                r = last_row + (d[0][0] * (a+1))
+                c = last_col + (d[0][1] * (a+1))
+
+                if d[2] and self.in_bounds(r, c) and boardCopy[r][c] == last_letter:
+                    d[1] += 1
+                else:
+                    # Stop searching in this direction
+                    d[2] = False
+
+        # Check possible direction pairs for '4 pieces in a row'
+        for i in range(0, 7, 2):
+            if (directions[i][1] + directions[i+1][1] >= 3):
+                self.print_board()
+                # Original winner print code but replaced with User or AI winning
+                #print(f"{last_letter} is the winner!")
+
+        boardCopy[row][column] == "O"
+        boardCopy[row - 1][column] == "X"
+            # If considered a dangerous move, results in a -50 for the qTable
+            # if  == "X":
+            #     return -50
+            # else:
+            #     # If the move is safe, this results in a zero. Allowing the AI to place their piece
+            #     return 0
+
+                # We added this
+
+                # End we added this
+        # Did not find any winners
