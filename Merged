@@ -1,0 +1,590 @@
+import random
+import math
+import sys
+import copy
+import numpy as np
+# @SpencerLepine - Connect Four command-line game made w/ Python
+# Hard-coded board size
+BOARD_COLS = 7
+BOARD_ROWS = 6
+
+#board variable
+#Initialize board
+board = [[' ' for _ in range(BOARD_COLS)] for _ in range(BOARD_ROWS)]
+#End we added this
+
+# Game board object
+class Board():
+    def __init__(self):
+        players1 = ['X', 'O']
+        players2 = ['O','X']
+        coin = random.randint(0,1)
+        if coin == 0:
+          self.players = players1
+        else:
+          self.players = players2
+        self.board = board
+        self.turns = 0
+        self.last_move = [-1, -1] # [r, c]
+
+    def print_board(self):
+        print("\n")
+        # Number the columns seperately to keep it cleaner
+        for r in range(BOARD_COLS):
+            print(f"  ({r+1}) ", end="")
+        print("\n")
+
+        # Print the slots of the game board
+        for r in range(BOARD_ROWS):
+            print('|', end="")
+            for c in range(BOARD_COLS):
+                print(f"  {self.board[r][c]}  |", end="")
+            print("\n")
+
+        print(f"{'-' * 42}\n")
+
+    def which_turn(self):
+        
+        return self.players[self.turns % 2]
+    
+    def in_bounds(self, r, c):
+        return (r >= 0 and r < BOARD_ROWS and c >= 0 and c < BOARD_COLS)
+
+    def turn(self, column):
+        # Search bottom up for an open slot
+        for i in range(BOARD_ROWS-1, -1, -1):
+            if self.board[i][column] == ' ':
+                self.board[i][column] = self.which_turn()
+                self.last_move = [i, column]
+
+                self.turns += 1
+                return True
+
+        return False
+
+    def check_winner(self,liveGamePlay):
+        last_row = self.last_move[0]
+        last_col = self.last_move[1]
+        last_letter = self.board[last_row][last_col]
+
+        # [r, c] direction, matching letter count, locked bool
+        directions = [[[-1, 0], 0, True], 
+                      [[1, 0], 0, True], 
+                      [[0, -1], 0, True],
+                      [[0, 1], 0, True],
+                      [[-1, -1], 0, True],
+                      [[1, 1], 0, True],
+                      [[-1, 1], 0, True],
+                      [[1, -1], 0, True]]
+        
+        # Search outwards looking for matching pieces
+        for a in range(4):
+            for d in directions:
+                r = last_row + (d[0][0] * (a+1))
+                c = last_col + (d[0][1] * (a+1))
+
+                if d[2] and self.in_bounds(r, c) and self.board[r][c] == last_letter:
+                    d[1] += 1
+                else:
+                    # Stop searching in this direction
+                    d[2] = False
+
+        # Check possible direction pairs for '4 pieces in a row'
+        for i in range(0, 7, 2):
+            if (directions[i][1] + directions[i+1][1] >= 3):
+                if liveGamePlay:
+                    self.print_board()
+                    print(f"{last_letter} is the winner!")
+                    return last_letter
+                else: # heuristic test
+                    return last_letter
+ 
+        # Did not find any winners
+        return False
+
+##########################################################################################
+#Start AI class
+#Programmer: Jaime Torrico
+class AI():
+    #qTable variable
+    qTable = [None]*BOARD_COLS
+
+    #Points system
+    AIPointsTable = {0: 0, 1: 1.15, 2: 2.15, 3: 100, 4: 102}
+    humanPointsTable = {0: 0, 1: 1, 2: 2.1, 3: 20, 4:21}
+
+###################################################
+    #Updates the Q table by calculating the points for all of the possible state spaces
+    #Programmer: Jaime Torrico
+    def updateQ():
+        #Calculated points for every column
+        for c in range(BOARD_COLS):
+            #Finds first open slot in each row and calculates points accordingly
+            AI.findTopOpen(c)
+        #prints the qTable
+        print(AI.qTable) 
+
+###################################################
+    #Finds the first open stop in each columns where a piece would fall and fills and calculates its points
+    #Programmer: Jaime Torrico
+    def findTopOpen(column):
+        #initialies value of zero to disregard any outdated valued that could possibly be saved
+        AI.qTable[column] = 0
+
+        #checks to see if a column is already full, if it puts a very large negative number in the table to prevent the AI from choosing 
+        #a column that is already full
+        if board[0][column] != ' ':
+            AI.qTable[column] = -100
+            return
+
+    #If the bottom row is empty it will pass down the bottom row
+        if board[5][column] == ' ':
+            #Calls method to tally points passing down the according row and column as paramaters
+            AI.tallyPoints(5, column)
+            return
+
+        #If the bottom row is not empty it will search through all of the rows in the column untill it finds the first empty row
+            #It does this by finding the first occupied row and subtracing 1 from it, therefore returning where the new piece would fall due to gravity
+        for r in range(BOARD_ROWS):
+            if board[r][column] != ' ':
+                #Calls method to tally points passing down the according row and column as paramaters
+                AI.tallyPoints(r-1, column)
+                return  
+################################################
+    #Programmer: Jaime Torrico
+    #Tallies points for opposite sides of the passed down row and column
+    # Two complimentary methods are passed down in the paramaters (EX: countLeftPieces, countRightPieces) 
+    # along with the current first open row and column
+    def tallyOppositeSides(leftMethod, rightMethod,row, column):
+        #how many of which piece there are on the left side
+        #calls method that returns the pieces for the left side
+        leftPieces = leftMethod(row, column)
+
+        #how many of which piece there are to the right side
+        #calls method that returns the pieces for the right side
+        rightPieces = rightMethod(row, column)
+
+        #If the pieces are empty / 0 or are different than the opposite side the points will be calculated independently
+        if leftPieces == 0 or rightPieces == 0 or leftPieces[0] != rightPieces[0]:
+            #left points calcualted
+            leftPoints =  AI.returnPoints(leftPieces)
+            #left points put in qTable
+            AI.qTable[column] += leftPoints
+            #right points calculated
+            rightPoints =  AI.returnPoints(rightPieces)
+            #right points put in qTable
+            AI.qTable[column] += rightPoints
+        #If the pieces have the same string than their number will be combined and points will be calculated together
+        else:
+            #String of the pieces
+            string = leftPieces[0]
+            #Numer of pieces
+            number = leftPieces[1]+rightPieces[1]
+            #pieces put together
+            totalPieces = string, number
+            #points calculated
+            points = AI.returnPoints(totalPieces)
+            #Points added to the qTable
+            AI.qTable[column] += points
+
+################################################
+    #Tallies the points for the row, and column passed down
+    #Programmer: Jaime Torrico
+    def tallyPoints(row, column):
+        #After calling each method, the points are calculated and added to the qTable
+
+
+        #Tallies opposite points
+
+        #Tallies points to the left and right horizontal (-)
+        AI.tallyOppositeSides(AI.countLeftPieces, AI.countRightPieces,row, column)
+
+        #Tallies points of the left and right of the left diagonal (\)
+        AI.tallyOppositeSides(AI.countLeftUpDiagonalPieces, AI.countLeftDownDiagonalPieces, row, column)
+
+        #Tallies points of the left and right of the right diagonal (/)
+        AI.tallyOppositeSides(AI.countBottomRightDiagonal, AI.countTopRightDiagonalPieces, row, column)
+        
+        #Tallies points of the bottom (|) 
+        pieces = AI.countDownPieces(row, column)
+        points = AI.returnPoints(pieces)
+        AI.qTable[column] += points
+
+################################################
+    #Counting directions methods
+    # #Checks how many consecutive pieces of the same piece are to the left of the current open spot (-)
+    #Programmer: Jaime Torrico
+    def countLeftPieces(row, column):
+        #The current piece to the left of the first open column
+        piece = board[row][column-1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        #if there is a piece it counts and returns the piece
+        else:
+            #for some reason it counts the pieces to the left
+            for i in range(column, 0, -1):
+                #Increments if the piece equals the privous
+                if board[row][i-1] == piece and i-1 != 7:
+                    count += 1
+                #breaks if the pieces are different or if there is no piece
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count 
+
+################################################
+    #Checks how many consecutive pieces of the same piece are to the right of the current the current open spot (-)
+    #Programmer: Jaime Torrico
+    def countRightPieces(row,column):
+        #The current piece to the right of the first open column
+        #Variable used to check if the column is out of bounds
+        currColumn = column + 1
+        if currColumn == 7:
+            return 0
+            
+        piece = board[row][column + 1]
+        count = 0
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        else:
+            for i in range(column, 6, 1):
+                #Increments upwards from 0 by 1 step
+                if board[row][i+1] == piece and i != 7: #Need to make sure that it does not go directly from 7 to 1
+                    count += 1
+                #breaks if the pieces are different or if there is no piece
+                else:
+                    break
+        return piece, count
+################################################
+    #Checks how many pieces are to the top left diagonal of the current open spot (Top \)
+    #Programmer: Jaime Torrico
+    def countLeftUpDiagonalPieces(row, column):
+        #If there is no left diagonal becuase it is out of bounds
+        if row == 0 or column == 0:
+            return 0
+        #Set the piece to the current left diagonal
+        piece = board[row-1][column-1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        else:
+            #start at current column
+            i = column
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            inc = 1
+            #while the column is greater than 0
+            while i > 0:
+                curr = board[row-inc][column-inc]
+                if curr == piece:
+                    count += 1
+                    inc += 1
+                    i -= 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count    
+
+################################################
+    #Counts bottom right diagonal pieces (Bottom \)
+    #Programmer: Jaime Torrico
+    def countLeftDownDiagonalPieces(row, column):
+        #If there is no diagonal becuase it is out of bounds it returns 0
+        if row == 5 or column == 6:
+            return 0
+
+        #Set the piece to the current bottom right diagonal
+        piece = board[row+1][column+1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        #If there is a piece
+        else:
+            #start at current column
+            i = column
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            inc = 1
+            #while the row and column + inc are in bound
+            while row + inc < 6 and column + inc < 7:
+                curr = board[row+inc][column+inc]
+                #if pieces are equal it increments the count
+                if curr == piece:
+                    count += 1
+                    inc += 1
+                    i += 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
+
+################################################
+    #Counts how many pieces are to the top right of the current open spot (Top /)
+    #Programmer: Jaime Torrico
+    def countTopRightDiagonalPieces(row, column):
+        #If there is no right diagonal becuase it is out of bounds
+        if row == 0 or column == 6:
+            return 0
+        #Set the piece to the current left diagonal
+        piece = board[row-1][column+1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        
+        else:
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            i = 1
+            #while the top right diagonal is in bounds
+            while row-i > 0 and column+i < 6:
+                curr = board[row-i][column+i]
+                if curr == piece:
+                    count += 1
+                    i += 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
+################################################
+    #Counts how many pieces are to the bottom left of the current open spot (Bottom /)
+    #Programmer: Jaime Torrico
+    def countBottomRightDiagonal(row, column):
+        #If there is no diagonal becuase it is out of bounds
+        if row == 5 or column == 0:
+            return 0
+        #Set the piece to the current left diagonal
+        piece = board[row+1][column-1]
+        count = 0;
+        #if there is no piece or out of bounds returns 0
+        if piece == ' ':
+            return 0
+        
+        else:
+            #inc starts at 1 and increases by one each time to go to the left diagonal
+            i = 1
+            #while the top right diagonal is in bounds
+            while row+i < 6 and column+i < 7:
+                curr = board[row+i][column-i]
+                if curr == piece:
+                    count += 1
+                    i += 1
+                else:
+                    break
+        #Returns the pieces and the count of the pieces
+        return piece, count
+####################################################
+    #count the pieces under the current open spot
+    #Programmer: Jaime Torrico
+    def countDownPieces(row, column):
+        #if down is out of bounds
+        if row == 5:
+            return 0
+        
+        piece = board[row + 1][column]
+        count = 0
+        if piece == ' ':
+            return 0
+        else:
+            while row < 5:
+                if board[row+1][column] == piece:
+                    count += 1
+                    row+=1
+                else:
+                    break
+        return piece, count
+#End counting directions method
+################################################
+    #Method that takes the type of piece and the number of pieces and returns the according points based on the point system
+    #Programmer: Jaime Torrico
+    def returnPoints(pieces):
+        #Pieces is (string piece, int num)
+        #EX: ('X',2) or ('O',2)
+        #It holds how many of what piece are passed down
+
+        #If there are no pieces
+        if pieces == 0: 
+            return 0
+            #Otherwise it retrieves the accordint points from the points tabel
+        else:
+            if pieces[0] == 'O':
+                return AI.AIPointsTable[pieces[1]]
+            else:
+                print (pieces[1])
+                return AI.humanPointsTable[pieces[1]] 
+
+################################################
+    #Chooses best piece based on what is in the QTable
+    #Programmer: Jaime Torrico
+    def AIMove():
+        #Retrieves the maximum from the qTable
+        maxPoints = (max(AI.qTable))
+        #returns the index of the maximum from the qTable
+        return AI.qTable.index(maxPoints)
+
+#End AI class
+##########################################################################################
+
+#-----------------------------------------------AI PROGRAMMING-------------------------------------------------------
+TreePiece = 'O'
+RuleBasedPiece = 'X'
+EMPTY = ' '
+
+GAME_LENGTH = 4
+
+def get_next_available_row(B, col):
+    for r in range(BOARD_ROWS):
+        if B.board[r][col] == EMPTY:
+            return r
+
+def evaluate_heuristic(window, piece):
+    score = 0
+    opp_piece = RuleBasedPiece
+    if piece == RuleBasedPiece:
+        opp_piece = TreePiece
+    if window.count(piece) == 4:
+        score += 100
+    elif window.count(piece) == 3 and window.count(EMPTY) == 1:
+        score += 5
+    elif window.count(piece) == 2 and window.count(EMPTY) == 2:
+        score += 2
+    if window.count(opp_piece) == 3 and window.count(EMPTY) == 1:
+        score -= 4
+    return score
+
+def heuristic_score(B, piece):
+    board = np.array(B.board)
+    score = 0
+    center_array = [i for i in list(board[:, BOARD_COLS//2])]
+    center_count = center_array.count(piece)
+    score += center_count * 3
+    # Checking the horizontals
+    # the horizontals logically check out: either way we take them row by row and evaluate each row
+    for r in range(BOARD_ROWS):
+        row_array = [i for i in list(board[r,:])]
+        for c in range(BOARD_COLS-3):
+            window = row_array[c:c+GAME_LENGTH]
+            score += evaluate_heuristic(window, piece)
+    # Checking the verticals
+    for c in range(BOARD_COLS):
+        col_array = [i for i in list(board[:,c])]
+        for r in range(BOARD_ROWS-3):
+            window = col_array[r:r+GAME_LENGTH]
+            score += evaluate_heuristic(window, piece)
+    # Checking positively sloped diagonals
+    for r in range(BOARD_ROWS-3):
+        for c in range(BOARD_COLS-3):
+            window = [B.board[r+i][c+i] for i in range(GAME_LENGTH)]
+            score += evaluate_heuristic(window, piece)
+    # Checking negatively sloped diagonals
+    for r in range(BOARD_ROWS-3): # O(r)  => total T(n) = O(rcg)
+            # T(cloop) = O(c)
+        for c in range(BOARD_COLS-3):
+            # T(window) = O(connect i)
+            window = [B.board[r+3-i][c+i] for i in range(GAME_LENGTH)]
+            score += evaluate_heuristic(window, piece)
+    return score
+def is_terminal_position(B):
+    return B.check_winner(False) == TreePiece or B.check_winner(False) == RuleBasedPiece or len(get_valid_positions(B)) == 0
+def is_valid_position(B, col):
+    return B.board[0][col] == EMPTY
+
+def get_valid_positions(B):
+    valid_positions = []
+    for col in range(BOARD_COLS):
+        if is_valid_position(B, col):
+            valid_positions.append(col)
+    return valid_positions
+
+def minimax(B, depth, alpha, beta, maxPlayer):
+    valid_positions = get_valid_positions(B)
+    is_terminal = is_terminal_position(B)
+    if depth == 0 or is_terminal:
+        if is_terminal:
+            
+            if B.check_winner(False) == TreePiece: # AI piece
+                
+                return (None, 100000000000000)
+                             
+            elif B.check_winner(False) == RuleBasedPiece: # Player Piece
+                return (None, -100000000000000)
+            else: # game over, no more moves
+                return (None, 0)
+        else: # Depth is zero
+            return (None, heuristic_score(B, TreePiece))
+    if maxPlayer:
+        value = -math.inf
+        column = random.choice(valid_positions)
+        for col in valid_positions:
+            row = get_next_available_row(B, col)
+            b_copy = copy.deepcopy(B)
+            #drop_piece(b_copy, row, col, PLAYER_PIECE)
+            b_copy.turn(col)
+            new_score = minimax(b_copy, depth-1, alpha, beta, False)[1]
+            if new_score > value:
+                value = new_score
+                column = col
+            alpha = max(alpha, value)
+            if alpha >= beta:
+              break
+        return column, value
+    else: # minPlayer
+        value = math.inf
+        column = random.choice(valid_positions)
+        for col in valid_positions:
+            row = get_next_available_row(B, col)
+            b_copy = copy.deepcopy(B)
+            b_copy.turn(col)
+            new_score = minimax(b_copy, depth-1, alpha, beta, True)[1]
+            if new_score < value:
+                value = new_score
+                column = col
+            beta = min(beta, value)
+            if alpha >= beta:
+              break
+        return column, value
+        
+#--------------------------------------------------------------------------------------------------------------------
+
+def play():
+    # Initialize the game board
+    game = Board()
+
+    game_over = False
+    while not game_over:
+        game.print_board()
+        print(game.which_turn())
+        
+          
+        # Ask the user for input, but only accept valid turns
+        valid_move = False
+        while not valid_move:
+            if game.which_turn() == TreePiece:
+                print(is_terminal_position(game))
+                AI_move = minimax(game,5, -math.inf, math.inf, True)[0]
+          
+                valid_move = game.turn(int(AI_move))  
+                game_over = game.check_winner(True)
+                
+            else : # AI turn
+                valid_move = False
+                AI.updateQ()
+
+                ai_move = AI.AIMove()
+                #print(AI.qTable)
+                #Does not subtract a 1 to make up for the index starting at 0 of the array therefore already being a -1
+                valid_move = game.turn(int(ai_move))
+                #ai_move +1 to make up for the array starting at 0 bt the board columns starting at 1
+                print("AI choose",ai_move+1)
+        
+       
+        # End the game if there is a tie
+        if not any(' ' in x for x in game.board):
+            print("The game is a draw..")
+            return
+
+
+if __name__ == '__main__':
+    play()  
