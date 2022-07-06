@@ -110,7 +110,7 @@ class AI():
     qTable = [None]*BOARD_COLS
 
     #Points system
-    AIPointsTable = {0: 0, 1: 1.15, 2: 2.15, 3: 100, 4: 102}
+    AIPointsTable = {0: 0, 1: 1.1, 2: 2.2, 3: 100, 4: 102}
     humanPointsTable = {0: 0, 1: 1, 2: 2.1, 3: 20, 4:21}
 
 ###################################################
@@ -428,8 +428,8 @@ class AI():
 ##########################################################################################
 
 #-----------------------------------------------AI PROGRAMMING-------------------------------------------------------
-TreePiece = 'O'
-RuleBasedPiece = 'X'
+TreePiece = 'X'
+RuleBasedPiece = 'O'
 EMPTY = ' '
 
 GAME_LENGTH = 4
@@ -555,20 +555,13 @@ def play():
     game_over = False
     while not game_over:
         game.print_board()
-        print(game.which_turn())
+        print(game.which_turn(), 'turn')
         
           
         # Ask the user for input, but only accept valid turns
         valid_move = False
         while not valid_move:
-            if game.which_turn() == TreePiece:
-                print(is_terminal_position(game))
-                AI_move = minimax(game,5, -math.inf, math.inf, True)[0]
-          
-                valid_move = game.turn(int(AI_move))  
-                game_over = game.check_winner(True)
-                
-            else : # AI turn
+            if game.which_turn() == RuleBasedPiece:
                 valid_move = False
                 AI.updateQ()
 
@@ -577,9 +570,16 @@ def play():
                 #Does not subtract a 1 to make up for the index starting at 0 of the array therefore already being a -1
                 valid_move = game.turn(int(ai_move))
                 #ai_move +1 to make up for the array starting at 0 bt the board columns starting at 1
-                print("AI choose",ai_move+1)
-        
-       
+                print("RuleBased choose:",ai_move+1)
+
+            else : # Tree AI
+                print(is_terminal_position(game))
+                AI_move = minimax(game,5, -math.inf, math.inf, True)[0]
+          
+                valid_move = game.turn(int(AI_move))
+                print("Graph Based choose:",AI_move+1)  
+                
+        game_over = game.check_winner(True)
         # End the game if there is a tie
         if not any(' ' in x for x in game.board):
             print("The game is a draw..")
