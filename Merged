@@ -110,7 +110,7 @@ class AI():
     qTable = [None]*BOARD_COLS
 
     #Points system
-    AIPointsTable = {0: 0, 1: 1.1, 2: 2.2, 3: 100, 4: 102}
+    AIPointsTable = {0: 0, 1: 1.1, 2: 2.3, 3: 100, 4: 102}
     humanPointsTable = {0: 0, 1: 1, 2: 2.1, 3: 20, 4:21}
 
 ###################################################
