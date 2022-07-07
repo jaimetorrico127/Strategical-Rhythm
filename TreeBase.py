@@ -242,15 +242,15 @@ def play():
                     print(f"Please choose a number between 1 and {BOARD_COLS}")
             else : # AI turn
                 valid_move = True
-                #AI_move, points = minimax(game,5, -math.inf, math.inf, True)
+                AI_move, points = minimax(game,5, -math.inf, math.inf, True)
                 #print(points)
-                #valid_move = game.turn(int(AI_move))
+                valid_move = game.turn(int(AI_move))
         
-        if game.which_turn() == AI_PIECE:
-          print(is_terminal_position(game))
-          AI_move = minimax(game,5, -math.inf, math.inf, True)[0]
+        #if game.which_turn() == AI_PIECE:
+          #print(is_terminal_position(game))
+          #AI_move = minimax(game,5, -math.inf, math.inf, True)[0]
           
-          valid_move = game.turn(int(AI_move))  
+          #valid_move = game.turn(int(AI_move))  
           #print(points)
         # End the game if there is a winner
         game_over = game.check_winner(True)
