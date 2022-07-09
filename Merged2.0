@@ -111,8 +111,8 @@ class RuleBasedAI():
     qTable = [None]*BOARD_COLS
 
     #Points system
-    AIPointsTable = {0: 0, 1: 1.12, 2: 2.2, 3: 100, 4: 102}
-    OpponentPointsTable = {0: 0, 1: 1.1, 2: 2.2, 3: 20, 4:21}
+    AIPointsTable = {0: 0, 1: 1.1, 2: 2.3, 3: 100, 4: 102}
+    OpponentPointsTable = {0: 0, 1: 1, 2: 2.1, 3: 20, 4:21}
 
 #--------------------------------------------------
     #Updates the Q table by calculating the points for all of the possible state spaces
