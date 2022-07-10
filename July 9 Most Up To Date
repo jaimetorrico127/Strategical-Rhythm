@@ -104,9 +104,6 @@ class Board():
 
 #------------------------------------Stretegical Rythem-------------------------------------
 """
--Our modifications to the reference code for the Connect 4 are neglibile and were only to have it fit easier with out implementations
-we do not expect our modifications to the reference code (In the board class) to count as contribution to the project
-
 -Our major work is below:
         -Rule-Based AI Implementation
             -Start indicated by "Start Rule-Based Implementation" comment
