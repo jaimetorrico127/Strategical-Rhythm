@@ -13,6 +13,7 @@ BOARD_ROWS = 6
 # Game board object
 class Board():
     def __init__(self):
+        # Players array was modified by John (Christian) Vega in order to randomize who goes first in the game
         players1 = ['X', 'O']
         players2 = ['O','X']
         coin = random.randint(0,1)
@@ -58,6 +59,7 @@ class Board():
                 return True
 
         return False
+    # Originally developed by SpencerLepine modified by Paola Nieto Arredondo
     # the method check_winner was modified to make it compatible with minimax
     # the modification includes a boolean liveGamePlay to allow the heuristic score
     # evaluations to take place on a copy of the board without affecting the viewable state of the game on the console
@@ -192,10 +194,13 @@ def heuristic_score(B, piece):
             window = [B.board[r+3-i][c+i] for i in range(GAME_LENGTH)]
             score += evaluate_heuristic(window, piece)
     return score
+    # is_terminal position: Originally developed by Keith Galli, modified by John (Christian) Vega
+    # the function now takes in a board object and now works with the modified check_winner function
 def is_terminal_position(B):
     # The is_terminal_position function tests if there are any winners or if there are no more valid positions
     return B.check_winner(False) == AI_PIECE or B.check_winner(False) == PLAYER_PIECE or len(get_valid_positions(B)) == 0
-    # the is_valid_position function was modified from the original implementation due to row index inversion
+    # the is_valid_position function was modified by John (Christian) Vega
+    #from the original implementation due to row index inversion
     # from the board of the original developer to the implementation of connect 4 used in our project
 def is_valid_position(B, col):
     return B.board[0][col] == EMPTY
@@ -210,7 +215,8 @@ def get_valid_positions(B):
             valid_positions.append(col)
     return valid_positions
 
-    # the minimax A-B pruning function was modified
+    # the minimax A-B pruning function was modified 
+    # by John (Christian) Vega and Paola Nieto Arredondo
     # from the original implementation to instead take a board object
     # the original check for winning state was omitted to instead make
     # use of the modified check_winner object method
@@ -245,6 +251,10 @@ def minimax(B, depth, alpha, beta, maxPlayer):
             # only score is determined recursively, the function determines
             # the ultimate column solely through iteration
             new_score = minimax(b_copy, depth-1, alpha, beta, False)[1]
+            # this code was added in order to pin point issues with AI not always selecting correct piece
+            # Added by John (Christian) Vega and tested by Paola Nieto Arredondo
+            # if beta==math.inf:
+            #    print(col, new_score)
             if new_score > value:
                 value = new_score
                 column = col
@@ -295,7 +305,8 @@ def play():
                 AI_move, points = minimax(game,5, -math.inf, math.inf, True)
                 #print(points)
                 valid_move = game.turn(int(AI_move))
-        
+        # The initial way of AI_turn taking was modified by John (Christian) Vega to 
+        # work within the if else clause due to console error issues when the user achieves victories
         #if game.which_turn() == AI_PIECE:
           #print(is_terminal_position(game))
           #AI_move = minimax(game,5, -math.inf, math.inf, True)[0]
