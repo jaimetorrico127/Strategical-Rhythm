@@ -4,6 +4,8 @@ import sys
 import copy
 import numpy as np
 # SpencerLepine - Connect Four command-line game made w/ Python
+# Link to Spencer Lepine connect 4 Implementation: 
+# https://github.com/spencerlepine/connect-four
 
 # Hard-coded board size
 BOARD_COLS = 7
