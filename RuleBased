@@ -102,24 +102,12 @@ class Board():
         return False
 
 
-#------------------------------------Stretegical Rythem-------------------------------------
-"""
--Our major work is below:
-        -Rule-Based AI Implementation
-            -Start indicated by "Start Rule-Based Implementation" comment
-            -End indicated by "#End Rule-Based AI" comment
-
-        -Alpha-Beta Pruning Implementation
-            -Start indicated by "#Start Tree-Based AI" comment
-            -End indicated by "#End Tree-Based AI" comment
-"""
-
 #Start Rule-Based Implementation
 #------------------------------------Rule-Based AI class------------------------------------
 #Programmer: Jaime Torrico
-#All work in this class is original work
+#Everything related to the Rule-Based AI playing is in the RuleBasedAI() clasa
 class RuleBasedAI():
-    #qTable variable
+    #qTable that holds the points for each column in in the board
     qTable = [None]*BOARD_COLS
 
     #Points system
@@ -127,7 +115,7 @@ class RuleBasedAI():
     OpponentPointsTable = {0: 0, 1: 1, 2: 2.1, 3: 20, 4:21}
 
 #--------------------------------------------------
-    #Updates the Q table by calculating the points for all of the possible state spaces
+    #Updates the Q table by calculating the points for all of the possible state spaces of the board
     #Programmer: Jaime Torrico
     def updateQ():
         #Calculated points for every column
@@ -138,7 +126,7 @@ class RuleBasedAI():
         print('Q-Table:',RuleBasedAI.qTable) 
 
 #--------------------------------------------------
-    #Finds the first open stop in each columns where a piece would fall and fills and calculates its points
+    #Finds the first open spot in each column where a piece would fall(to gravity) and fills and calculates its points
     #Programmer: Jaime Torrico
     def findTopOpen(column):
         #initialies value of zero to disregard any outdated valued that could possibly be saved
@@ -150,14 +138,15 @@ class RuleBasedAI():
             RuleBasedAI.qTable[column] = -100
             return
 
-    #If the bottom row is empty it will pass down the bottom row
+        #If the bottom row is empty it will pass down the bottom row 
+        #Checks the bottom row first to see if it does not have to check all of the other rows
         if board[5][column] == ' ':
             #Calls method to tally points passing down the according row and column as paramaters
             RuleBasedAI.tallyPoints(5, column)
             return
 
         #If the bottom row is not empty it will search through all of the rows in the column untill it finds the first empty row
-            #It does this by finding the first occupied row and subtracing 1 from it, therefore returning where the new piece would fall due to gravity
+        #It does this by finding the first occupied row and subtracing 1 from it, therefore returning where the new piece would fall due to gravity
         for r in range(BOARD_ROWS):
             if board[r][column] != ' ':
                 #Calls method to tally points passing down the according row and column as paramaters
@@ -169,6 +158,7 @@ class RuleBasedAI():
     #Tallies points for opposite sides of the passed down row and column
     # Two complimentary methods are passed down in the paramaters (EX: countLeftPieces, countRightPieces) 
     # along with the current first open row and column
+    # This method is to have the AI recognize pieces on opposite sides of the same spot to be counted as consecutive 
     def tallyOppositeSides(leftMethod, rightMethod,row, column):
         #how many of which piece there are on the left side
         #calls method that returns the pieces for the left side
@@ -205,9 +195,9 @@ class RuleBasedAI():
     #Tallies the points for the row, and column passed down
     #Programmer: Jaime Torrico
     def tallyPoints(row, column):
-        #After calling each method, the points are calculated and added to the qTable
-
+    
         #Tallies pionts for pieces in opposite directions
+        #After calling each method, the points are calculated and added to the qTable
 
         #Tallies points to the left and right horizontal (-)
         RuleBasedAI.tallyOppositeSides(RuleBasedAI.countLeftPieces, RuleBasedAI.countRightPieces,row, column)
@@ -227,19 +217,19 @@ class RuleBasedAI():
         RuleBasedAI.qTable[column] += points
 
 #--------------------------------------------------
-    #Counting directions methods
     #Checks how many consecutive pieces of the same piece are to the left of the current open spot (-)
     #Programmer: Jaime Torrico
+    #Counts how many pieces are to the left of the passed down row and column on the board
     def countLeftPieces(row, column):
         #The current piece to the left of the first open column
         piece = board[row][column-1]
+        #Count variable starts at 0
         count = 0;
         #if there is no piece or out of bounds returns 0
         if piece == ' ':
             return 0
         #if there is a piece it counts and returns the piece
         else:
-            #for some reason it counts the pieces to the left
             for i in range(column, 0, -1):
                 #Increments if the piece equals the privous
                 if board[row][i-1] == piece and i-1 != 7:
@@ -259,16 +249,18 @@ class RuleBasedAI():
         currColumn = column + 1
         if currColumn == 7:
             return 0
-            
+        #Initialized the piece    
         piece = board[row][column + 1]
+        #Count starts at 0
         count = 0
         #if there is no piece or out of bounds returns 0
         if piece == ' ':
             return 0
+        #otherwise it counts the pieces
         else:
             for i in range(column, 6, 1):
-                #Increments upwards from 0 by 1 step
-                if board[row][i+1] == piece and i != 7: #Need to make sure that it does not go directly from 7 to 1
+                #if the current board position is equal to the piece it will increment the count
+                if board[row][i+1] == piece and i != 7:
                     count += 1
                 #breaks if the pieces are different or if there is no piece
                 else:
@@ -276,7 +268,7 @@ class RuleBasedAI():
         return piece, count
 
 #--------------------------------------------------
-    #Checks how many pieces are to the top left diagonal of the current open spot (Top \)
+    #Checks how many consecutive pieces are to the top left diagonal of the current open spot (Top \)
     #Programmer: Jaime Torrico
     def countLeftUpDiagonalPieces(row, column):
         #If there is no left diagonal becuase it is out of bounds
@@ -295,18 +287,21 @@ class RuleBasedAI():
             inc = 1
             #while the column is greater than 0
             while i > 0 and row-inc >= 0 and column-inc >= 0:
+                #curr is set to the current location of the board
                 curr = board[row-inc][column-inc]
+                #If curr is the same piece at the piece than it will increment the count and the location of the location
                 if curr == piece:
                     count += 1
                     inc += 1
                     i -= 1
+                #Otherwise it will exit the loop
                 else:
                     break
         #Returns the pieces and the count of the pieces
         return piece, count    
 
 #--------------------------------------------------
-    #Counts bottom right diagonal pieces (Bottom \)
+    #Counts consecutive bottom right diagonal pieces (Bottom \)
     #Programmer: Jaime Torrico
     def countLeftDownDiagonalPieces(row, column):
         #If there is no diagonal becuase it is out of bounds it returns 0
@@ -323,23 +318,25 @@ class RuleBasedAI():
         else:
             #start at current column
             i = column
-            #inc starts at 1 and increases by one each time to go to the left diagonal
+            #Inc starts at 1 and increases by one each time to go to the left diagonal
             inc = 1
             #while the row and column + inc are in bound
             while row + inc < 6 and column + inc < 7:
+                #Cur is equal to the current location on the board
                 curr = board[row+inc][column+inc]
                 #if pieces are equal it increments the count
                 if curr == piece:
                     count += 1
                     inc += 1
                     i += 1
+                #Otherwise it exits the loop
                 else:
                     break
         #Returns the pieces and the count of the pieces
         return piece, count
 
 #--------------------------------------------------
-    #Counts how many pieces are to the top right of the current open spot (Top /)
+    #Counts how many consecutive pieces are to the top right of the current open spot (Top /)
     #Programmer: Jaime Torrico
     def countTopRightDiagonalPieces(row, column):
         #If there is no right diagonal becuase it is out of bounds
@@ -357,17 +354,20 @@ class RuleBasedAI():
             i = 1
             #while the top right diagonal is in bounds
             while row-i > 0 and column+i < 6:
+                #Cur is set to the current position on the board
                 curr = board[row-i][column+i]
+                #If curr is equal to the piece the count is incremented
                 if curr == piece:
                     count += 1
                     i += 1
+                #Otherwise it exits the loop
                 else:
                     break
         #Returns the pieces and the count of the pieces
         return piece, count
 
 #--------------------------------------------------
-    #Counts how many pieces are to the bottom left of the current open spot (Bottom /)
+    #Counts how many consecutive pieces are to the bottom left of the current open spot (Bottom /)
     #Programmer: Jaime Torrico
     def countBottomRightDiagonal(row, column):
         #If there is no diagonal becuase it is out of bounds
@@ -379,38 +379,46 @@ class RuleBasedAI():
         #if there is no piece or out of bounds returns 0
         if piece == ' ':
             return 0
-        
+        #otherwise is counts how many pieces there are
         else:
             #inc starts at 1 and increases by one each time to go to the left diagonal
             i = 1
             #while the top right diagonal is in bounds
             while row+i < 6 and column-i >= 0:
+                #Curr is the current position on the board
                 curr = board[row+i][column-i]
+                #If curr and piece are the same piece the count is incremented
                 if curr == piece:
                     count += 1
                     i += 1
+                #otherwise the loop is terminated
                 else:
                     break
         #Returns the pieces and the count of the pieces
         return piece, count
 
 #--------------------------------------------------
-    #count the pieces under the current open spot
+    #Counts how many consecutive pieces are under the current open spot
     #Programmer: Jaime Torrico
     def countDownPieces(row, column):
         #if down is out of bounds
         if row == 5:
             return 0
-        
+        #Piece variable is initialized to the current location on the board
         piece = board[row + 1][column]
         count = 0
+        #If the piece is empty it returns 0
         if piece == ' ':
             return 0
+        #Otherwise it counts the pieces
         else:
+            #While the row is in bounds
             while row < 5:
+                #If the new location on the board is equl to the piece the count is incremented
                 if board[row+1][column] == piece:
                     count += 1
                     row+=1
+                #Otherwise the loop is termineated
                 else:
                     break
         return piece, count
@@ -423,18 +431,21 @@ class RuleBasedAI():
         #EX: ('X',2) or ('O',2)
         #It holds how many of what piece are passed down
 
-        #If there are no pieces
+        #If there are no pieces it returns 0
         if pieces == 0: 
             return 0
-            #Otherwise it retrieves the accordint points from the points tabel
+        #Otherwise it retrieves the accordint points from the points tabe
         else:
+            #Checks which character the piece is to call the correct dictionary
             if pieces[0] == 'O':
+                #Rule-Based AI piece
                 return RuleBasedAI.AIPointsTable[pieces[1]]
             else:
+                #Opponent piece
                 return RuleBasedAI.OpponentPointsTable[pieces[1]] 
 
 #--------------------------------------------------
-    #Chooses best piece based on what is in the QTable
+    #Chooses best move based on what is in the QTable
     #Programmer: Jaime Torrico
     def AIMove():
         #Updates Q-Table values
@@ -450,13 +461,15 @@ class RuleBasedAI():
             print('First piece choose:', firstMove+1)
             return firstMove
         else:
-            #returns the index of the maximum from the qTable
+            #Otherwise it returns the index of the maximum from the qTable
             return RuleBasedAI.qTable.index(maxPoints)
         
 #-------------------------------------------------------------------------------------------
 #End Rule-Based AI
-AI_PIECE = 'X'
-PLAYER_PIECE = 'O'
+
+#Variables that indicate which is the AI piece and which is the opponent piece
+AI_PIECE = 'O'
+PLAYER_PIECE = 'X'
 
 def play():
     # Initialize the game board
@@ -470,20 +483,23 @@ def play():
         # Ask the user for input, but only accept valid turns
         valid_move = False
         while not valid_move:
-            #Player piece is the rule-based AI piece
-            if game.which_turn() == PLAYER_PIECE:
+            #If it is the AI's turn
+            if game.which_turn() == AI_PIECE:
+                #Retrieves the AI's move
                 ai_move = RuleBasedAI.AIMove()
+                #Submits it move to the board
                 #Does not subtract a 1 to make up for the index starting at 0 of the array therefore already being a -1
                 valid_move = game.turn(int(ai_move))
                 #ai_move +1 to make up for the array starting at 0 bt the board columns starting at 1
                 print("RuleBased choose:",ai_move+1)
-
+            #If it is not the AI's turn
             else : 
                 user_move = input(f"{game.which_turn()}'s Turn - pick a column (1-{BOARD_COLS}): ")
                 try:
                     valid_move = game.turn(int(user_move)-1)
                 except:
                     print(f"Please choose a number between 1 and {BOARD_COLS}")
+                    
         game_over = game.check_winner(True)
         # End the game if there is a tie
         if not any(' ' in x for x in game.board):
