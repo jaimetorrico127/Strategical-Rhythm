@@ -11,7 +11,7 @@ BOARD_ROWS = 6
 
 
 # Game board object
-class Board():
+class Board():  
     def __init__(self):
         # Players array was modified by John (Christian) Vega in order to randomize who goes first in the game
         players1 = ['X', 'O']
@@ -110,6 +110,7 @@ class Board():
         return False
 #-----------------------------------------------AI PROGRAMMING-------------------------------------------------------
 # Originally programmed by Keith Galli
+# Link to Galli's original implementation: https://github.com/KeithGalli/Connect4-Python
 # Modified and refactored by John (Christian) Vega and Paola Nieto Arredondo
 AI_PIECE = 'O'
 PLAYER_PIECE = 'X'
