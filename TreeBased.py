@@ -123,7 +123,7 @@ GAME_LENGTH = 4
 # make the original implementation compatible with the project game, instead of taking in two dimensional
 # arrays as original the method instead takes in a board object that calls on its array
 def get_next_available_row(B, col):
-    for r in range(BOARD_ROWS,-1,-1):
+    for r in range(BOARD_ROWS):
         if B.board[r][col] == EMPTY:
             return r
 # This function is the core function that assigns heuristic scoring, 
